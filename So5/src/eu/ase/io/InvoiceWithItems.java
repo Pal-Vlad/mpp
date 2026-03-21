@@ -1,0 +1,45 @@
+package eu.ase.io;
+
+import javax.xml.crypto.Data;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class InvoiceWithItems {
+    private List<InvoiceItem> items;
+
+    public InvoiceWithItems(List<InvoiceItem> items) {
+        this.items = items;
+    }
+
+    public void savetoFile(String fileName) throws IOException {
+        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fileName)));
+        for(InvoiceItem item: items) {
+            out.writeUTF(item.getDescription());
+            out.writeInt(item.getUnit());
+            out.writeDouble(item.getPrice());
+        }
+        out.close();
+    }
+
+    public List<InvoiceItem> readFromFile(String fileName) throws IOException {
+        DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(fileName)));
+        double total = 0.0;
+        List<InvoiceItem> itemsList = new ArrayList<>();
+        try {
+            while(true) {
+                String desc = in.readUTF();
+                int units = in.readInt();
+                double price = in.readDouble();
+
+                InvoiceItem item = new InvoiceItem(desc, units, price);
+                itemsList.add(item);
+            }
+
+        } catch (EOFException eofe) {
+            in.close();
+            //eofe.printStackTrace();
+        }
+        return  itemsList;
+    }
+}
